@@ -1,16 +1,8 @@
-#!/usr/bin/python3
 # models/engine/file_storage.py
 import json
-from models.city import City
-from models.state import State
-from models.user import User
-from models.review import Review
-
 
 class FileStorage:
-    #create a os filestorageengine
-    
-    __file_path = 'file.json'
+    __file_path = "file.json"
     __objects = {}
 
     def all(self):
@@ -21,21 +13,18 @@ class FileStorage:
         FileStorage.__objects[key] = obj
 
     def save(self):
+        obj_dict = {obj.id: obj.to_dict() for obj in FileStorage.__objects.values()}
         with open(FileStorage.__file_path, 'w') as f:
-            json.dump({k: v.to_dict() for k, v in FileStorage.__objects.items()}, f)
+            json.dump(obj_dict, f)
 
     def reload(self):
         try:
-            with open(self.__file_path, 'r') as f:
+            with open(FileStorage.__file_path, 'r') as f:
                 objs = json.load(f)
-                for key, value in objs.items():
-                    cls_name = value['__class__']
-                    cls = globals().get(cls_name)
-                    if cls:
-                        self.__objects[key] = cls(**value)
-                    else:
-                        print(f"Warning: '{cls_name}' class not found.")
+                for obj_id, obj_data in objs.items():
+                    cls_name = obj_data['__class__']
+                    cls = globals()[cls_name]
+                    obj = cls(**obj_data)
+                    FileStorage.__objects[obj_id] = obj
         except FileNotFoundError:
-            pass  # This is normal if file doesn't exist yet
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON: {e}")
+            pass

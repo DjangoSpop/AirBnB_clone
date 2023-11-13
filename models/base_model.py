@@ -1,8 +1,7 @@
-#!/usr/bin/python3
 # models/base_model.py
 import uuid
 from datetime import datetime
-
+from models import storage
 
 class BaseModel:
     def __init__(self, *args, **kwargs):
@@ -12,16 +11,15 @@ class BaseModel:
         else:
             for key, value in kwargs.items():
                 if key in ['created_at', 'updated_at']:
-                    value = datetime.fromisoformat(value)
+                    value = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f')
                 if key != '__class__':
                     setattr(self, key, value)
-   
+        storage.new(self)
 
     def __str__(self):
         return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
 
     def save(self):
-        from models import storage
         self.updated_at = datetime.now()
         storage.save()
 

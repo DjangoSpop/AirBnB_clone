@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # models/city.py
 from models.base_model import BaseModel
 

@@ -1,6 +1,6 @@
-#!/usr/bin/python3
-# Additional attributes for Amenity
+# models/amenity.py
 from models.base_model import BaseModel
+
 class Amenity(BaseModel):
     name = ""
     description = ""
