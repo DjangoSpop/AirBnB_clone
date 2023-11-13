@@ -5,6 +5,7 @@ console.py module: Contains the entry point of the command interpreter.
 
 import cmd
 from models.base_model import BaseModel
+from models.base_model import BaseModel
 from models.user import User
 from models.state import State
 from models.city import City
@@ -32,18 +33,27 @@ class HBNBCommand(cmd.Cmd):
         """An empty line + ENTER shouldn’t execute anything"""
         pass
 
+    def default(self, line):
+        """Default action when no match is found"""
+        pass
+
+    @staticmethod
+    def _print_objects():
+        """Prints all objects in memory."""
+        pass
+
     def do_create(self, arg):
-        """Creates a new instance of BaseModel, saves it to the JSON file, and prints the id."""
         if not arg:
             print("** class name missing **")
             return
-
         try:
-            obj = eval(f"{arg}()")
+            obj = eval(f"{arg}()".format(arg))
             obj.save()
             print(obj.id)
         except NameError:
             print("** class doesn't exist **")
+        except Exception as e:
+            print(f"Error: {e}")
 
     def do_show(self, arg):
         """Prints the string representation of an instance based on the class name and id."""
@@ -76,51 +86,90 @@ class HBNBCommand(cmd.Cmd):
         obj_dict = storage.all()
         key = f"{args[0]}.{args[1]}"
 
-        if key in obj_dict:
+        if args[0] in BaseModel.__subclasses__().__name__ and key in obj_dict:
             del obj_dict[key]
             storage.save()
         else:
             print("** no instance found **")
 
-    def do_all(self, arg):
-        """Prints all string representation of all instances based or not on the class name."""
-        obj_dict = storage.all()
-        if arg:
-            if arg in BaseModel.__subclasses__().__name__:
-                print([str(obj) for key, obj in obj_dict.items() if type(obj).__name__ == arg])
-            else:
-                print("** class doesn't exist **")
-        else:
-            print([str(obj) for obj in obj_dict.values()])
-
-    def do_update(self, arg):
-        """Updates an instance based on the class name and id by adding or updating attribute."""
-        args = arg.split()
-        if len(args) < 2:
-            print("** class name missing **" if len(args) == 0 else "** instance id missing **")
-            return
-        if len(args) < 3:
-            print("** attribute name missing **")
-            return
-        if len(args) < 4:
-            print("** value missing **")
             return
 
         obj_dict = storage.all()
         key = f"{args[0]}.{args[1]}"
 
         if key in obj_dict:
-            obj = obj_dict[key]
-            try:
-                attr_type = type(getattr(obj, args[2]))
-                value = attr_type(args[3].strip("\"'"))
-                setattr(obj, args[2], value)
-                obj.save()
-            except AttributeError:
-                setattr(obj, args[2], args[3].strip("\"'"))
-                obj.save()
+            del obj_dict[key]
+            storage.save()
         else:
             print("** no instance found **")
+
+   
+    def do_all(self, arg):
+        subclasses = [cls.__name__ for cls in BaseModel.__subclasses__()]
+        if arg in subclasses:
+            print([str(obj) for obj in storage.all().values() if type(obj).__name__ == arg])
+        elif not arg:
+            print([str(obj) for obj in storage.all().values()])
+        else:
+            print("** class doesn't exist **")
+    def complete_create(self, text, line, begidx, endidx):
+        """Completes the create command."""
+        return [cls.__name__ for cls in BaseModel.__subclasses__()]
+    
+    def do_update(self, arg):
+        args = self.parse_update_args(arg)
+        if not args:
+            return
+
+        class_name, instance_id, attribute_name, attribute_value = args
+        obj_dict = storage.all()
+        obj_key = f"{class_name}.{instance_id}"
+
+        if obj_key not in obj_dict:
+            print("** no instance found **")
+            return
+
+        obj = obj_dict[obj_key]
+        try:
+            # Attempt to set the attribute with the correct type
+            self.set_object_attribute(obj, attribute_name, attribute_value)
+        except AttributeError as e:
+            print(f"Error: {e}")
+        except ValueError as e:
+            print(f"Invalid value for attribute: {e}")
+        else:
+            obj.save()
+
+    def parse_update_args(self, arg):
+        """Parses the arguments for the update command and returns them or prints an error."""
+        args = arg.split()
+        if len(args) < 4:
+            error_messages = [
+                "** class name missing **",
+                "** instance id missing **",
+                "** attribute name missing **",
+                "** value missing **"
+            ]
+            print(error_messages[len(args)])
+            return None
+        return args[:4]  # Return the first four arguments
+
+    def set_object_attribute(self, obj, attribute_name, attribute_value):
+        """Sets an attribute of an object, attempting to use the correct type."""
+        attribute_value = attribute_value.strip("\"'")
+        if hasattr(obj, attribute_name):
+            attr_type = type(getattr(obj, attribute_name))
+            attribute_value = attr_type(attribute_value)
+        setattr(obj, attribute_name, attribute_value)
+    def print_instances_of_class(self, class_name):
+        obj_dict = storage.all()
+        for obj in obj_dict.values():
+            if obj.__class__.__name__ == class_name:
+                print(obj)
+    def print_all_instances(self):
+        obj_dict = storage.all()
+        for obj in obj_dict.values():
+            print(obj)
 
 
 if __name__ == '__main__':

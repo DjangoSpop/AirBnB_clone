@@ -8,6 +8,8 @@ from models.review import Review
 
 
 class FileStorage:
+    #create a os filestorageengine
+    
     __file_path = 'file.json'
     __objects = {}
 
@@ -24,11 +26,16 @@ class FileStorage:
 
     def reload(self):
         try:
-            with open(FileStorage.__file_path, 'r') as f:
+            with open(self.__file_path, 'r') as f:
                 objs = json.load(f)
                 for key, value in objs.items():
                     cls_name = value['__class__']
-                    cls = globals()[cls_name]
-                    FileStorage.__objects[key] = cls(**value)
+                    cls = globals().get(cls_name)
+                    if cls:
+                        self.__objects[key] = cls(**value)
+                    else:
+                        print(f"Warning: '{cls_name}' class not found.")
         except FileNotFoundError:
-            return
+            pass  # This is normal if file doesn't exist yet
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
