@@ -1,0 +1,24 @@
+/* FILEPATH: /C:/Users/ahmed el bahi/AirBnB_clone/web_static/styles/3-footer.css */
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: white;
+  border-top: 1px solid #CCCCCC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.footer p {
+  margin: 0;
+}
+
+/* Additional styles for the page content */
+body {
+  margin-bottom: 60px; /* Add margin to the bottom of the page to prevent content from being hidden by the footer */
+}

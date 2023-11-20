@@ -1,0 +1,21 @@
+/* FILEPATH: /C:/Users/ahmed el bahi/AirBnB_clone/web_static/styles/3-common.css */
+
+/* Reset margin and padding */
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+/* Set font color, size, and family */
+body {
+    color: #484848;
+    font-size: 14px;
+    font-family: Circular, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* Add icon in the browser tab */
+/* Replace 'favicon.ico' with the path to your icon file */
+/* Make sure to place the icon file in the appropriate location */
+/* For example, if the icon file is in the same directory as this CSS file, use './favicon.ico' */
+/* If the icon file is in a different directory, adjust the path accordingly */
+<link rel="icon" href="favicon.ico" type="image/x-icon">
